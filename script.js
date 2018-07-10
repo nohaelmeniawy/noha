@@ -1,27 +1,56 @@
-document.getElementById("add").onclick = function() {
-    
-    var text = document.getElementById("item").value; //.value gets input values
+const checkboxes = document.getElementById('list').getElementsByTagName('input');
+const nodeList = Array.prototype.slice.call( document.getElementById('list').getElementsByTagName('ul')[0].children );
 
-    
-    var li = document.createElement("li");
-    
-    li.setAttribute('id',text);
-    li.appendChild(document.createTextNode(text));
-    document.getElementById("list").appendChild(li);
+const multiSelect = {
+	box : {
+		undefined,
+		undefined	
+	},
+	shift : false,
+	addMore : true,
+	selectMany: function(){
+		let i = this.box[0], x = this.box[1];
+		if( i > x ){
+			for( ; x<i; x++ ){
+				checkboxes[x].checked = this.addMore;
+			}
+		}
+		if( i < x ){
+			for( ; i<x; i++ ){
+				console.log( i );
+				checkboxes[i].checked = this.addMore;
+			}
+		}
+		this.box[0] = undefined;
+		this.box[1] = undefined;
+	}
+};
+
+for( let i=0, x=checkboxes.length; i<x; i++ ){
+	checkboxes[i].addEventListener('click', function(){
+
+			multiSelect.addMore = (this.checked)? true : false;	
+		
+			if( multiSelect.shift ){
+				multiSelect.box[1] = nodeList.indexOf( this.parentNode );
+				multiSelect.selectMany();
+			}else{
+				multiSelect.box[0] = nodeList.indexOf( this.parentNode );
+			}
+		
+	});
 }
 
-function searchItem(event){
-    var fi = event.target.value.toLowerCase();
-    var it = document.getElementsByTagName('li');
-    for(var i=0; i<it.length;i++){
-        var name = it[i].textContent;
-        if (name.toLowerCase().indexOf(fi) !== -1)
-            it[i].style.display = 'list-item';
-        else
-            it[i].style.display = 'none';
-    }
-}
-
-var search = document.getElementById('search');
-search.addEventListener('input',searchItem);
-
+document.body.addEventListener('keydown', function(e){
+	let key = window.event? event : e;
+	if( !!key.shiftKey ){
+		
+		multiSelect.shift = true;
+	}
+});
+document.body.addEventListener('keyup', function(e){
+	let key = window.event? event : e;
+	if( !key.shiftKey ){
+		multiSelect.shift = false;
+	}
+});
